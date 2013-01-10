@@ -18,7 +18,7 @@ echo invalid choice
 goto start
 
 :1
-(gpupdate /force /boot & exit)
+(gpupdate /force /boot)
 goto start
 
 :2
@@ -32,10 +32,6 @@ etc.
 pause>nul
 :4
 (Ipconfig /all)
-goto start 
-:6
-
-goto start 
-
+goto start
 :6
 EXIT /B
