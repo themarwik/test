@@ -4,7 +4,7 @@ echo 1. Kjore Gpupdate
 echo 2. Restarte Maskinen
 echo 3. Logge Av
 echo 4. Sjekke Ip Adressen
-echo 5.
+echo 5. Flush DNS
 echo 6. Avlutt cmd
 set /p userinp=choose a number(1-6):
 set userinp=%userinp:~0,1%
@@ -25,13 +25,14 @@ goto start
 (shutdown -r -t 60000)
 goto end
 :3
-stuff
-goto end
-etc.
-:end 
-pause>nul
+(shutdown -l)
+
 :4
 (Ipconfig /all)
 goto start
+
+:5
+(ipconfig /flushdns)
+
 :6
 EXIT /B
