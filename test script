@@ -1,12 +1,34 @@
 @echo off
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+if '%errorlevel%' NEQ '0' (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+
+    "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+    if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
+    pushd "%CD%"
+    CD /D "%~dp0"
+
+
+@echo off
 :start
-echo 1. Kjore Gpupdate
-echo 2. Restarte Maskinen
-echo 3. Logge Av
-echo 4. Sjekke Ip Adressen
-echo 5. Flush DNS
-echo 6. Avlutt cmd
-set /p userinp=choose a number(1-6):
+echo 1. Reset Elev Konto
+echo 2. Kjore Gpupdate
+echo 3. Slett Windows Logg
+echo 4. Flush DNS
+echo 5. Sjekke Ip Adressen
+echo 6. Logge Av
+echo 7. Restarte Maskinen
+echo 8. Avlutt cmd
+set /p userinp=choose a number(1-8):
 set userinp=%userinp:~0,1%
 if "%userinp%"=="1" goto 1
 if "%userinp%"=="2" goto 2
@@ -14,25 +36,52 @@ if "%userinp%"=="3" goto 3
 if "%userinp%"=="4" goto 4
 if "%userinp%"=="5" goto 5
 if "%userinp%"=="6" goto 6
+if "%userinp%"=="7" goto 7
+if "%userinp%"=="8" goto 8
 echo invalid choice
 goto start
 
 :1
+set /p bruker= <C:\Windows\system\user.txt
+
+ntrights.exe -u %bruker% -r SeInteractiveLogonRight
+
+ntrights.exe -u "Brukere" +r SeInteractiveLogonRight
+
+del C:\Windows\system\user.txt
+goto start
+:2
 (gpupdate /force /boot)
 goto start
 
-:2
-(shutdown -r -t 60000)
-goto end
 :3
-(shutdown -l)
+
+FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V
+IF (%adminTest%)==(Access) goto noAdmin
+for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
+echo.
+echo Event Logs have been cleared! ^<press any key^>
+goto theEnd
+:do_clear
+echo clearing %1
+wevtutil.exe cl %1
+
+
+goto start
 
 :4
+(ipconfig /flushdns)
+
+:5
 (Ipconfig /all)
 goto start
 
-:5
-(ipconfig /flushdns)
-
 :6
+(shutdown -l)
+
+:7
+(shutdown -r -t 60000)
+goto end
+
+:8
 EXIT /B
