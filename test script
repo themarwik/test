@@ -1,0 +1,41 @@
+@echo off
+:start
+echo 1. Kjore Gpupdate
+echo 2. Restarte Maskinen
+echo 3. Logge Av
+echo 4. Sjekke Ip Adressen
+echo 5.
+echo 6. Avlutt cmd
+set /p userinp=choose a number(1-6):
+set userinp=%userinp:~0,1%
+if "%userinp%"=="1" goto 1
+if "%userinp%"=="2" goto 2
+if "%userinp%"=="3" goto 3
+if "%userinp%"=="4" goto 4
+if "%userinp%"=="5" goto 5
+if "%userinp%"=="6" goto 6
+echo invalid choice
+goto start
+
+:1
+(gpupdate /force /boot & exit)
+goto start
+
+:2
+(shutdown -r -t 60000)
+goto end
+:3
+stuff
+goto end
+etc.
+:end 
+pause>nul
+:4
+(Ipconfig /all)
+goto start 
+:6
+
+goto start 
+
+:6
+EXIT /B
