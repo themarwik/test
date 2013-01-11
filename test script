@@ -17,18 +17,21 @@ if '%errorlevel%' NEQ '0' (
     pushd "%CD%"
     CD /D "%~dp0"
 
-
 @echo off
-:start
-echo 1. Reset Elev Konto
-echo 2. Kjore Gpupdate
-echo 3. Slett Windows Logg
-echo 4. Flush DNS
-echo 5. Sjekke Ip Adressen
-echo 6. Logge Av
-echo 7. Restarte Maskinen
-echo 8. Avlutt cmd
-set /p userinp=choose a number(1-8):
+:star
+cls
+echo 1.  Reset Elev Konto
+echo 2.  Kjore Gpupdate
+echo 3.  Slett Windows Logg
+echo 4.  Flush DNS
+echo 5.  Sjekke Ip Adressen
+echo 6.  Stop  Windows Update
+echo 7.  Start Windows Update
+echo 8.  Logge Av
+echo 9.  Restart Maskin
+echo 10. Avlutt cmd
+
+set /p userinp=choose a number(1-10):
 set userinp=%userinp:~0,1%
 if "%userinp%"=="1" goto 1
 if "%userinp%"=="2" goto 2
@@ -38,9 +41,10 @@ if "%userinp%"=="5" goto 5
 if "%userinp%"=="6" goto 6
 if "%userinp%"=="7" goto 7
 if "%userinp%"=="8" goto 8
+if "%userinp%"=="9" goto 9
+if "%userinp%"=="10" goto 10
 echo invalid choice
 goto start
-
 :1
 set /p bruker= <C:\Windows\system\user.txt
 
@@ -53,9 +57,8 @@ goto start
 :2
 (gpupdate /force /boot)
 goto start
-
 :3
-
+@echo off
 FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V
 IF (%adminTest%)==(Access) goto noAdmin
 for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
@@ -65,23 +68,24 @@ goto theEnd
 :do_clear
 echo clearing %1
 wevtutil.exe cl %1
-
-
-goto start
-
+goto :eof
 :4
 (ipconfig /flushdns)
-
-:5
-(Ipconfig /all)
 goto start
-
+:5
+(ipconfig /all)
 :6
-(shutdown -l)
+net stop wuauserv
+pause
 
 :7
-(shutdown -r -t 60000)
-goto end
-
+net start wuauserv
+pause
 :8
+(shutdown -l)
+:9
+(shutdown -r -t 60000)
+:10
 EXIT /B
+:end
+pause>nul
